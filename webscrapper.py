@@ -12,21 +12,49 @@ import pyperclip
 
 # ---------------------- Category Keywords ----------------------
 CATEGORY_KEYWORDS = {
-    "Skincare": ["skincare", "skin care", "face cream", "moisturizer", "serum", "lotion", "cleanser"],
-    "Hair Care": ["shampoo", "conditioner", "hair oil", "haircare", "hair mask"],
-    "Footwear": ["shoes", "sneakers", "sandals", "boots", "footwear"],
-    "Fragnances": [
-        "perfume", "fragrance", "cologne", "deodorant", "scent",
-        "aroma", "incense", "essential oil", "diffuser", "attar", "room spray", "aromatherapy"
+    "Skincare": [
+        "skincare", "skin care", "face cream", "moisturizer", "serum", "lotion", "cleanser", "face wash", "toner", "sunscreen"
     ],
-    "Personal Care": ["personal care", "toothpaste", "soap", "body wash", "hygiene"],
-    "Clothing": ["clothing", "apparel", "t-shirt", "jeans", "dress", "fashion", "wear"],
-    "Electronics": ["laptop", "mobile", "electronics", "gadgets", "headphones", "smartphone"],
-    "Jewelry": ["jewelry", "ring", "necklace", "bracelet", "gold", "silver"],
-    "Furniture": ["furniture", "sofa", "table", "chair", "interior"],
-    "Food & Beverages": ["food", "beverage", "snacks", "drink", "restaurant", "cafe"],
+    "Hair Care": [
+        "shampoo", "conditioner", "hair oil", "haircare", "hair mask", "hair serum", "hair spray"
+    ],
+    "Perfumes & Fragrances": [
+        "perfume", "fragrance", "cologne", "deodorant", "scent",
+        "aroma", "incense", "essential oil", "diffuser", "attar", "room spray", "aromatherapy", "fragrance oil"
+    ],
+    "Personal Care": [
+        "personal care", "toothpaste", "soap", "body wash", "hygiene", "sanitizer", "toothbrush", "oral care", "deodorant"
+    ],
+    "Health & Wellness": [
+        "health", "wellness", "vitamins", "supplements", "ayurveda", "immunity", "protein", "fitness", "yoga", "gym", "nutraceutical", "herbal"
+    ],
+    "Footwear": [
+        "shoes", "sneakers", "sandals", "boots", "footwear", "slippers", "heels"
+    ],
+    "Clothing & Fashion": [
+        "clothing", "apparel", "t-shirt", "jeans", "dress", "fashion", "wear", "kurta", "saree", "jacket", "trousers", "hoodie"
+    ],
+    "Electronics & Gadgets": [
+        "laptop", "mobile", "electronics", "gadgets", "headphones", "smartphone", "tablet", "camera", "earbuds", "charger", "smartwatch", "tv"
+    ],
+    "Jewelry & Accessories": [
+        "jewelry", "ring", "necklace", "bracelet", "gold", "silver", "earrings", "bangles", "accessories", "jewellery"
+    ],
+    "Furniture & Home": [
+        "furniture", "sofa", "table", "chair", "interior", "bed", "wardrobe", "home decor", "lamp", "cushion", "mattress"
+    ],
+    "Food & Beverages": [
+        "food", "beverage", "snacks", "drink", "restaurant", "cafe", "tea", "coffee", "chocolate", "juice", "organic food"
+    ],
+    "Sports & Fitness": [
+        "sports", "fitness", "gym", "exercise", "equipment", "workout", "yoga", "training", "running", "athletic"
+    ],
+    "Books & Education": [
+        "book", "novel", "education", "school", "college", "learning", "course", "study", "e-learning", "tutorial"
+    ],
     "Other": []
 }
+
 
 # ---------------------- Scraper Logic ----------------------
 UA = (
