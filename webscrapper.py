@@ -10,6 +10,24 @@ from duckduckgo_search import DDGS
 from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
 import pyperclip
 
+# ---------------------- Category Keywords ----------------------
+CATEGORY_KEYWORDS = {
+    "Skincare": ["skincare", "skin care", "face cream", "moisturizer", "serum", "lotion", "cleanser"],
+    "Hair Care": ["shampoo", "conditioner", "hair oil", "haircare", "hair mask"],
+    "Footwear": ["shoes", "sneakers", "sandals", "boots", "footwear"],
+    "Fragnances": [
+        "perfume", "fragrance", "cologne", "deodorant", "scent",
+        "aroma", "incense", "essential oil", "diffuser", "attar", "room spray", "aromatherapy"
+    ],
+    "Personal Care": ["personal care", "toothpaste", "soap", "body wash", "hygiene"],
+    "Clothing": ["clothing", "apparel", "t-shirt", "jeans", "dress", "fashion", "wear"],
+    "Electronics": ["laptop", "mobile", "electronics", "gadgets", "headphones", "smartphone"],
+    "Jewelry": ["jewelry", "ring", "necklace", "bracelet", "gold", "silver"],
+    "Furniture": ["furniture", "sofa", "table", "chair", "interior"],
+    "Food & Beverages": ["food", "beverage", "snacks", "drink", "restaurant", "cafe"],
+    "Other": []
+}
+
 # ---------------------- Scraper Logic ----------------------
 UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -62,11 +80,19 @@ def get_soup(html):
         return BeautifulSoup(html, "html.parser")
 
 def extract_category(soup):
+    text = ""
     meta_desc = soup.find("meta", attrs={"name": "description"}) or soup.find("meta", attrs={"property": "og:description"})
     if meta_desc and meta_desc.get("content"):
-        return meta_desc["content"][:100]
-    title = soup.title.string.strip() if soup.title and soup.title.string else "N/A"
-    return title[:100]
+        text = meta_desc["content"].lower()
+    elif soup.title and soup.title.string:
+        text = soup.title.string.lower()
+
+    # Match with keyword dictionary
+    for category, keywords in CATEGORY_KEYWORDS.items():
+        if any(kw in text for kw in keywords):
+            return category
+
+    return "Other"
 
 def scrape_contact_page(base_url, max_phones=3):
     try:
