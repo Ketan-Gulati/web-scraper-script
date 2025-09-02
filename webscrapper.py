@@ -7,7 +7,7 @@ from urllib.parse import urlparse, urljoin
 import io
 import time
 from duckduckgo_search import DDGS
-from st_aggrid import AgGrid, GridOptionsBuilder, GridUpdateMode
+from st_aggrid import AgGrid, GridOptionsBuilder
 import pyperclip
 
 # ---------------------- Category Keywords ----------------------
@@ -81,8 +81,6 @@ CATEGORY_KEYWORDS = {
     ],
     "Other": []
 }
-
-
 
 # ---------------------- Scraper Logic ----------------------
 UA = (
@@ -178,33 +176,6 @@ def scrape_website(url, max_phones=3):
             "Phone Numbers": ", ".join(phones),
             "Category": category
         }
-    except Exception as e:
-        return {
-            "Website": url,
-            "Emails": "",
-            "Phone Numbers": "",
-            "Category": f"Failed to fetch: {e}"
-        }
-
-def scrape_website(url, max_phones=3):
-    try:
-        html = fetch_html(url)
-        soup = get_soup(html)
-        emails, phones = extract_contact_info(html, max_phones)
-
-        # Try contact page for better accuracy
-        if not emails:
-            c_emails, c_phones = scrape_contact_page(url, max_phones)
-            emails = emails or c_emails
-            phones = phones or c_phones
-
-        category = extract_category(soup)
-        return {
-            "Website": url,
-            "Emails": ", ".join(emails),
-            "Phone Numbers": ", ".join(phones),
-            "Category": category
-        }
 
     except Exception:
         # Retry with http:// if https:// failed
@@ -223,7 +194,7 @@ def scrape_website(url, max_phones=3):
                 }
             except Exception:
                 pass
-        
+
         # If all fails
         return {
             "Website": url,
@@ -232,6 +203,18 @@ def scrape_website(url, max_phones=3):
             "Category": "Failed to fetch (unreachable)"
         }
 
+def get_website_from_search(company_name):
+    """Searches DuckDuckGo for the company's official website"""
+    try:
+        q = f"{company_name} official website"
+        with DDGS() as ddgs:
+            for r in ddgs.text(q, max_results=1, region="in-en", safesearch="moderate"):
+                href = r.get("href") or r.get("link")
+                if href:
+                    return href
+    except Exception as e:
+        print(f"Search failed for {company_name}: {e}")
+    return None
 
 # ---------------------- Streamlit UI ----------------------
 def main():
@@ -347,12 +330,11 @@ def main():
         grid_response = AgGrid(
             df,
             gridOptions=grid_options,
-            update_on="MODEL_CHANGED",   # ✅ new recommended parameter
+            update_on="MODEL_CHANGED",   # ✅ fixed
             allow_unsafe_jscode=True,
             theme="dark",
             fit_columns_on_grid_load=True,
         )
-
 
         updated_df = grid_response["data"]
         selected = grid_response["selected_rows"]
