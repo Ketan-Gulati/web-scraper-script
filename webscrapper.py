@@ -13,47 +13,75 @@ import pyperclip
 # ---------------------- Category Keywords ----------------------
 CATEGORY_KEYWORDS = {
     "Skincare": [
-        "skincare", "skin care", "face cream", "moisturizer", "serum", "lotion", "cleanser", "face wash", "toner", "sunscreen"
+        "skincare", "skin care", "face cream", "moisturizer", "serum", "lotion",
+        "cleanser", "face wash", "toner", "sunscreen", "acne", "anti-aging"
     ],
     "Hair Care": [
-        "shampoo", "conditioner", "hair oil", "haircare", "hair mask", "hair serum", "hair spray"
+        "shampoo", "conditioner", "hair oil", "haircare", "hair mask",
+        "hair serum", "hair spray", "scalp care"
     ],
     "Perfumes & Fragrances": [
         "perfume", "fragrance", "cologne", "deodorant", "scent",
-        "aroma", "incense", "essential oil", "diffuser", "attar", "room spray", "aromatherapy", "fragrance oil"
+        "aroma", "incense", "essential oil", "diffuser", "attar",
+        "room spray", "aromatherapy", "fragrance oil"
     ],
     "Personal Care": [
-        "personal care", "toothpaste", "soap", "body wash", "hygiene", "sanitizer", "toothbrush", "oral care", "deodorant"
+        "personal care", "toothpaste", "soap", "body wash", "hygiene",
+        "sanitizer", "toothbrush", "oral care", "deodorant", "shaving",
+        "grooming", "bath"
     ],
     "Health & Wellness": [
-        "health", "wellness", "vitamins", "supplements", "ayurveda", "immunity", "protein", "fitness", "yoga", "gym", "nutraceutical", "herbal"
+        "health", "wellness", "vitamins", "supplements", "ayurveda",
+        "immunity", "protein", "fitness", "yoga", "gym",
+        "nutraceutical", "herbal", "meditation", "mindfulness"
+    ],
+    "Sustainable & Eco-friendly": [
+        "sustainable", "eco-friendly", "eco friendly", "organic", "biodegradable",
+        "zero waste", "cruelty free", "vegan", "fair trade", "recyclable",
+        "natural", "handmade", "plant-based", "green", "ethical"
     ],
     "Footwear": [
-        "shoes", "sneakers", "sandals", "boots", "footwear", "slippers", "heels"
+        "shoes", "sneakers", "sandals", "boots", "footwear",
+        "slippers", "heels", "loafers", "sports shoes"
     ],
     "Clothing & Fashion": [
-        "clothing", "apparel", "t-shirt", "jeans", "dress", "fashion", "wear", "kurta", "saree", "jacket", "trousers", "hoodie"
+        "clothing", "apparel", "t-shirt", "jeans", "dress", "fashion",
+        "wear", "kurta", "saree", "jacket", "trousers", "hoodie",
+        "blazer", "denim", "tops", "skirts"
     ],
     "Electronics & Gadgets": [
-        "laptop", "mobile", "electronics", "gadgets", "headphones", "smartphone", "tablet", "camera", "earbuds", "charger", "smartwatch", "tv"
+        "laptop", "mobile", "electronics", "gadgets", "headphones",
+        "smartphone", "tablet", "camera", "earbuds", "charger",
+        "smartwatch", "tv", "gaming", "console", "wearables"
     ],
     "Jewelry & Accessories": [
-        "jewelry", "ring", "necklace", "bracelet", "gold", "silver", "earrings", "bangles", "accessories", "jewellery"
+        "jewelry", "ring", "necklace", "bracelet", "gold", "silver",
+        "earrings", "bangles", "accessories", "jewellery", "watch",
+        "pendant", "anklet"
     ],
     "Furniture & Home": [
-        "furniture", "sofa", "table", "chair", "interior", "bed", "wardrobe", "home decor", "lamp", "cushion", "mattress"
+        "furniture", "sofa", "table", "chair", "interior", "bed",
+        "wardrobe", "home decor", "lamp", "cushion", "mattress",
+        "carpet", "kitchenware", "curtains", "bedding"
     ],
     "Food & Beverages": [
-        "food", "beverage", "snacks", "drink", "restaurant", "cafe", "tea", "coffee", "chocolate", "juice", "organic food"
+        "food", "beverage", "snacks", "drink", "restaurant", "cafe",
+        "tea", "coffee", "chocolate", "juice", "organic food",
+        "bakery", "cuisine", "beverages", "confectionery"
     ],
     "Sports & Fitness": [
-        "sports", "fitness", "gym", "exercise", "equipment", "workout", "yoga", "training", "running", "athletic"
+        "sports", "fitness", "gym", "exercise", "equipment",
+        "workout", "yoga", "training", "running", "athletic",
+        "outdoor", "cycling", "sportswear", "cricket", "football"
     ],
     "Books & Education": [
-        "book", "novel", "education", "school", "college", "learning", "course", "study", "e-learning", "tutorial"
+        "book", "novel", "education", "school", "college",
+        "learning", "course", "study", "e-learning", "tutorial",
+        "exam", "textbook", "reading", "library"
     ],
     "Other": []
 }
+
 
 
 # ---------------------- Scraper Logic ----------------------
@@ -158,17 +186,52 @@ def scrape_website(url, max_phones=3):
             "Category": f"Failed to fetch: {e}"
         }
 
-def get_website_from_search(company_name):
+def scrape_website(url, max_phones=3):
     try:
-        q = f"{company_name} official website"
-        with DDGS() as ddgs:
-            for r in ddgs.text(q, max_results=1, region="in-en", safesearch="moderate"):
-                href = r.get("href") or r.get("link")
-                if href:
-                    return href
+        html = fetch_html(url)
+        soup = get_soup(html)
+        emails, phones = extract_contact_info(html, max_phones)
+
+        # Try contact page for better accuracy
+        if not emails:
+            c_emails, c_phones = scrape_contact_page(url, max_phones)
+            emails = emails or c_emails
+            phones = phones or c_phones
+
+        category = extract_category(soup)
+        return {
+            "Website": url,
+            "Emails": ", ".join(emails),
+            "Phone Numbers": ", ".join(phones),
+            "Category": category
+        }
+
     except Exception:
-        pass
-    return None
+        # Retry with http:// if https:// failed
+        if url.startswith("https://"):
+            try:
+                url_http = url.replace("https://", "http://", 1)
+                html = fetch_html(url_http)
+                soup = get_soup(html)
+                emails, phones = extract_contact_info(html, max_phones)
+                category = extract_category(soup)
+                return {
+                    "Website": url_http,
+                    "Emails": ", ".join(emails),
+                    "Phone Numbers": ", ".join(phones),
+                    "Category": category
+                }
+            except Exception:
+                pass
+        
+        # If all fails
+        return {
+            "Website": url,
+            "Emails": "",
+            "Phone Numbers": "",
+            "Category": "Failed to fetch (unreachable)"
+        }
+
 
 # ---------------------- Streamlit UI ----------------------
 def main():
@@ -284,11 +347,12 @@ def main():
         grid_response = AgGrid(
             df,
             gridOptions=grid_options,
-            update_mode=GridUpdateMode.MODEL_CHANGED,
+            update_on="MODEL_CHANGED",   # ✅ new recommended parameter
             allow_unsafe_jscode=True,
             theme="dark",
             fit_columns_on_grid_load=True,
         )
+
 
         updated_df = grid_response["data"]
         selected = grid_response["selected_rows"]
